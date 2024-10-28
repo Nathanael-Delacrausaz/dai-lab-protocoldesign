@@ -12,17 +12,25 @@ supported operations : ADD, SUB, MULT, DIV
 
 The operands have to be number. Error response if it's not the case
 
-## 4) 
-### example 2 
-Client connects to server
+## 4) Examples
+### example 1
+Client connects to server 
+
 Server sends a welcome message
+
 The client sends the operation to the server
+
 THe server process the operation and send the reponse
+
 The server close the tcp connection 
 
-### example 1 
+### example 2
 Client connects to server
+
 Server sends a welcome message
+
 The client sends the operation to the server with letters
+
 The server send a error message 
+
 The server close the tcp connection 
