@@ -8,7 +8,7 @@ import java.net.Socket;
 import java.util.Scanner;
 
 public class Client {
-    final String SERVER_ADDRESS = "1.2.3.4";
+    final String SERVER_ADDRESS = "localhost";
     final int SERVER_PORT = 1234;
 
     public static void main(String[] args) {
@@ -27,7 +27,7 @@ public class Client {
             System.out.println("Server: " + welcomeMessage);
 
             while (true) {
-                System.out.print("Enter operation (e.g., ADD 10 20) or 'exit' to quit: ");
+                System.out.print("Enter expression (e.g. ADD 10 20) or 'exit' to quit: ");
                 String command = scanner.nextLine();
 
                 // Exit command

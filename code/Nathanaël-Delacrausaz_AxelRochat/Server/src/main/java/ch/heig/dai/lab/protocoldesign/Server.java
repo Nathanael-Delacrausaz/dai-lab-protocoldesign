@@ -25,15 +25,14 @@ public class Server {
                 // Accept a new client connection
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("Client connected: " + clientSocket.getInetAddress());
-                new ClientHandler(clientSocket).start();
+                new Thread(new ClientHandler(clientSocket)).start();
             }
         } catch (IOException e) {
             System.err.println("Server error: " + e.getMessage());
         }
     }
 
-    // Define the ClientHandler as a private static inner class
-    private static class ClientHandler extends Thread {
+    private static class ClientHandler implements Runnable {
         private final Socket clientSocket;
 
         public ClientHandler(Socket clientSocket) {
@@ -45,20 +44,58 @@ public class Server {
             try (BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                  PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
 
-                out.println("Welcome to your favorite calculator!");
-                out.println("Please enter an operation and 2 numbers in the format: ADD 5 3");
-                out.println("Valid operations are: ADD, SUB, MULT, DIV");
+                // Send welcome message to the client
+                out.println("Welcome. Valid operations : ADD, SUB, MULT, DIV");
 
                 String clientMessage;
                 while ((clientMessage = in.readLine()) != null) {
                     System.out.println("Received: " + clientMessage);
 
-                    // Process the message
-                    String response = processClientMessage(clientMessage);
-                    out.println(response);
+                    // Split the client's message into parts
+                    String[] parts = clientMessage.trim().split("\\s+");
+                    if (parts.length != 3) {
+                        out.println("Invalid input format. Please use: OPERATION number1 number2");
+                        continue;
+                    }
 
-                    System.out.println("Processed and responded to client.");
+                    String operation = parts[0].toUpperCase();
+                    double num1, num2;
+                    try {
+                        num1 = Double.parseDouble(parts[1]);
+                        num2 = Double.parseDouble(parts[2]);
+                    } catch (NumberFormatException e) {
+                        out.println("Invalid numbers. Please use numeric values for number1 and number2.");
+                        continue;
+                    }
+
+                    // Perform the requested operation
+                    double result;
+                    switch (operation) {
+                        case "ADD":
+                            result = num1 + num2;
+                            break;
+                        case "SUB":
+                            result = num1 - num2;
+                            break;
+                        case "MULT":
+                            result = num1 * num2;
+                            break;
+                        case "DIV":
+                            if (num2 == 0) {
+                                out.println("Division by zero is not allowed.");
+                                continue;
+                            }
+                            result = num1 / num2;
+                            break;
+                        default:
+                            out.println("Invalid operation. Valid operations are: ADD, SUB, MULT, DIV");
+                            continue;
+                    }
+
+                    // Send the result to the client
+                    out.println("Result: " + result);
                 }
+
             } catch (IOException e) {
                 System.err.println("Client handler error: " + e.getMessage());
             } finally {
@@ -69,46 +106,6 @@ public class Server {
                     System.err.println("Error closing client socket: " + e.getMessage());
                 }
             }
-        }
-
-        // Method to process client messages and perform arithmetic operations
-        private String processClientMessage(String message) {
-            String[] parts = message.split(" ");
-            if (parts.length != 3) {
-                return "Invalid input format. Please use: OPERATION number1 number2";
-            }
-
-            String operation = parts[0].toUpperCase();
-            double num1, num2;
-            try {
-                num1 = Double.parseDouble(parts[1]);
-                num2 = Double.parseDouble(parts[2]);
-            } catch (NumberFormatException e) {
-                return "Invalid numbers. Please enter valid numerical values.";
-            }
-
-            double result;
-            switch (operation) {
-                case "ADD":
-                    result = num1 + num2;
-                    break;
-                case "SUB":
-                    result = num1 - num2;
-                    break;
-                case "MULT":
-                    result = num1 * num2;
-                    break;
-                case "DIV":
-                    if (num2 == 0) {
-                        return "Error: Division by zero is not allowed.";
-                    }
-                    result = num1 / num2;
-                    break;
-                default:
-                    return "Invalid operation. Valid operations are: ADD, SUB, MULT, DIV.";
-            }
-
-            return "Result: " + result;
         }
     }
 }
